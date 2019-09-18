@@ -153,7 +153,7 @@ def run!
         releases = b.last_releases(u[:name])
         logger.info " Tracking #{repos.count} repositories - #{releases[:releases].count} with releases, for #{u[:name]}."
 
-        selected_releases = releases[:releases].reject { |_k, v| v.nil? || v.publish_date < (u.last_check || Time.new(0)) }
+        selected_releases = releases[:releases].reject { |_k, v| v.nil? || v.publish_date < (u[:last_check] || Time.new(0)) }
         selected_releases.each do |_name, rel|
           logger.info "   Posting notice about #{rel.full_name} #{rel.version}"
           rel.avatar_url = fix_media_url(rel.avatar_url, config) if rel.avatar_url
@@ -167,7 +167,7 @@ def run!
           )
         end
 
-        u.last_check = Time.now if selected_releases.any?
+        u[:last_check] = Time.now if selected_releases.any?
       end
 
       b.post_update

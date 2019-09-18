@@ -83,7 +83,7 @@ module MatrixReleasetracker::Backends
       euser = ephemeral_user(user)
 
       next_check = puser[:next_check]
-      next_check = Time.parse(next_check.to_s) unless next_check.is_a? Time
+      next_check = Time.parse((next_check || Time.now).to_s) unless next_check.is_a? Time
       return puser[:repos] if puser[:repos] && (next_check || Time.new(0)) > Time.now
       logger.debug "Timeout (#{puser[:next_check]}) reached on `stars`, refreshing data for user #{user}."
 
@@ -139,7 +139,7 @@ module MatrixReleasetracker::Backends
       allow = [:lightweight_tag, :tag, :release] unless allow.is_a? Array
 
       if gql_available?
-        erepo[:latest] = find_gql_releases(repo, prepo, erepo).select { |r| allow.include? r.type }.last
+        erepo[:latest] = find_gql_releases(repo, prepo, erepo).select { |r| allow.include? r[:type] }.last
       elsif allow.include? :release
         erepo[:latest] = find_rest_releases(repo, prepo, erepo).last
       end
@@ -212,10 +212,11 @@ module MatrixReleasetracker::Backends
 
         # TODO Check the GraphQL API more thoroughly, if this really can't be retrieved instead of calculated
         url = "https://github.com/#{repo}/releases/tag/#{tag.name}"
-        releases[tag.name] = InternalRelease.new(tag.target.oid, tag.name, tag.name, time, url, tag.target.message, type)
+        releases[tag.name] ||= []
+        releases[tag.name] << InternalRelease.new(tag.target.oid, tag.name, tag.name, time, url, tag.target.message, type)
       end
 
-      releases = releases.values.sort { |a, b| a.date <=> b.date }
+      releases = releases.values.flatten.sort { |a, b| a.date <=> b.date }
       releases.map do |rel|
         {
           sha: rel.sha,

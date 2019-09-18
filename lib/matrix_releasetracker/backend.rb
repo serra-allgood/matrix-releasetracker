@@ -77,7 +77,7 @@ module MatrixReleasetracker
     end
 
     def persistent_user(username)
-      m_client.room_data(users.find { |u| u.name == username }[:room])
+      m_client.room_data(users.find { |u| u[:name] == username }[:room])
     end
 
     def ephemeral_users
