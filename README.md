@@ -16,7 +16,7 @@ Example config:
 - :access_token: 0000000000000000000000000000000000000000
   :type: github
   :users:
-  - :name: ananace
+  - :name: github-username
     :room: '!exampleroomid:kittenface.studio'
   - :name: github
     :room: '!exampleroomid:matrix.org'
